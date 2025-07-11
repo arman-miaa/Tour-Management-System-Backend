@@ -1,13 +1,31 @@
-import { IUser } from "./user.interface";
+import AppError from "../../errorhelpers/appError";
+import { IAuthProvider, IUser } from "./user.interface";
 import { User } from "./user.model";
+import httpsStatus from "http-status-codes";
+import bcrypjs from "bcrypt"
 
 
 const createUser = async (payload: Partial<IUser>) => {
-    const { name, email } = payload;
+    const {  email, password,...rest } = payload;
+
+  const isUserExist = await User.findOne({ email })
+  
+  if (isUserExist) {
+    throw new AppError(httpsStatus.BAD_REQUEST, "User Already Exist")
+  }
+
+  const hashedPassword = await bcrypjs.hash(password as string, 10)
+
+
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const authProvider : IAuthProvider = {provider: "credentials", providerId:email!}
 
     const user = await User.create({
-      name,
+     
       email,
+      password: hashedPassword,
+     auths: [authProvider],
+      ...rest
     });
     return user;
 }
