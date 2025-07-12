@@ -24,8 +24,8 @@ import { JwtPayload } from "jsonwebtoken";
       if (!authRoles.includes(verifiedToken.role)) {
         throw new AppError(403, "You are not permitted to view this route");
       }
-      console.log(verifiedToken);
-
+     
+        req.user = verifiedToken;
       next();
     } catch (error) {
       next(error);
