@@ -1,30 +1,47 @@
-import AppError from "../../errorhelpers/appError";
-import { IUser } from "../user/user.interface"
-import { User } from "../user/user.model";
+import bcryptjs from "bcrypt";
 import httpStatus from "http-status-codes";
-import bcryptjs from "bcrypt"
+import { envVars } from "../../config/env";
+
+import { generateToken } from "../../utils/jwt";
+import { IUser } from "../user/user.interface";
+import { User } from "../user/user.model";
+import AppError from "../../errorhelpers/appError";
 
 const credentialsLogin = async (payload: Partial<IUser>) => {
-    const { email, password } = payload;
+  const { email, password } = payload;
 
-    const isUserExist = await User.findOne({ email })
-    
-    if (!isUserExist) {
-        throw new AppError(httpStatus.BAD_REQUEST, "Email does not exist")
-    }
+  const isUserExist = await User.findOne({ email });
 
-    const isPasswordMatched = await bcryptjs.compare(password as string, isUserExist.password as string)
+  if (!isUserExist) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Email does not exist");
+  }
 
-    if (!isPasswordMatched) {
-        throw new AppError(httpStatus.BAD_REQUEST, "Incorrect Password")
-    }
+  const isPasswordMatched = await bcryptjs.compare(
+    password as string,
+    isUserExist.password as string
+  );
 
-    return {
-        email: isUserExist.email
-    }
-    
-}
+  if (!isPasswordMatched) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Incorrect Password");
+  }
+  const jwtPayload = {
+    userId: isUserExist._id,
+    email: isUserExist.email,
+    role: isUserExist.role,
+  };
+  const accessToken = generateToken(
+    jwtPayload,
+    envVars.JWT_ACCESS_SECRET,
+    envVars.JWT_ACCESS_EXPIRES
+  );
+
+  return {
+    accessToken,
+  };
+};
+
+//user - login - token (email, role, _id) - booking / payment / booking / payment cancel - token
 
 export const AuthServices = {
-    credentialsLogin
-}
+  credentialsLogin,
+};
