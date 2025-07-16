@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import bcryptjs from "bcrypt";
 import httpStatus from "http-status-codes";
@@ -48,9 +49,27 @@ const getNewAccessToken = async (refreshToken: string) => {
   };
 };
 
+const resetPassword = async (oldPassword: string, newPassword: string, decodedToken: JwtPayload) => {
+  
+  const user = await User.findById(decodedToken.userId)
+
+  const isOldPasswordMatch = await bcryptjs.compare(oldPassword, user!.password as string)
+  if (!isOldPasswordMatch) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "Old Password does not match");
+  }
+
+  user!.password = await bcryptjs.hash(newPassword, Number(envVars.BCRYPT_SALT_ROUND));
+  
+  user!.save()
+
+
+
+};
+
 //user - login - token (email, role, _id) - booking / payment / booking / payment cancel - token
 
 export const AuthServices = {
   credentialsLogin,
   getNewAccessToken,
+  resetPassword,
 };

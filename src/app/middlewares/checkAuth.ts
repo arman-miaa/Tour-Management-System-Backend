@@ -3,6 +3,9 @@ import AppError from "../errorhelpers/appError";
 import { envVars } from "../config/env";
 import { verifyToken } from "../utils/jwt";
 import { JwtPayload } from "jsonwebtoken";
+import httpStatus from "http-status-codes"
+import { User } from "../modules/user/user.model";
+import { IsActive } from "../modules/user/user.interface";
 
 
  export const checkAuth =
@@ -15,10 +18,31 @@ import { JwtPayload } from "jsonwebtoken";
         throw new AppError(403, "Now Token Recieved");
       }
 
+
       const verifiedToken = verifyToken(
         accessToken,
         envVars.JWT_ACCESS_SECRET
       ) as JwtPayload;
+
+
+        const isUserExist = await User.findOne({
+            email: verifiedToken.email,
+          });
+      
+
+if (!isUserExist) {
+  throw new AppError(httpStatus.BAD_REQUEST, "User does not exist");
+}
+if (
+  isUserExist.isActive === IsActive.BLOCKED ||
+  isUserExist.isActive === IsActive.INACTIVE
+) {
+  throw new AppError(httpStatus.BAD_REQUEST, `User is ${isUserExist.isActive}`);
+}
+if (isUserExist.isDeleted) {
+  throw new AppError(httpStatus.BAD_REQUEST, "User is deleted");
+}
+
 
       // authRotes = ["ADMIN", "SUPER_ADMIN"].includes("ADMIN")
       if (!authRoles.includes(verifiedToken.role)) {
