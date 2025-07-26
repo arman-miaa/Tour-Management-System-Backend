@@ -11,16 +11,6 @@ import { handleZodError } from "../helpers/handleZodError";
 import { handleValidationError } from "../helpers/handleValidationError";
 import { TErrorSources } from "../interfaces/error.types";
 
-
-
-
-
-
-
-
-
-
-
 export const globalErrorHandler = (err: any,req: Request,res: Response, next: NextFunction
 ) => {
   if (envVars.NODE_ENV === "development") {
