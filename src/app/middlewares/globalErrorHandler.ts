@@ -66,7 +66,7 @@ errorSources = simplifiedError.errorSources as TErrorSources[]
       message = err.message;
     } else if (err instanceof Error) {
       statusCode = 500;
-      message = message || err.message;
+      message =  err.message;
     }
 
   res.status(statusCode).json({

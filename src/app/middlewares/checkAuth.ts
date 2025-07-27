@@ -15,7 +15,7 @@ import { IsActive } from "../modules/user/user.interface";
       const accessToken = req.headers.authorization;
 
       if (!accessToken) {
-        throw new AppError(403, "Now Token Recieved");
+        throw new AppError(403, "No Token Recieved");
       }
 
 
