@@ -14,13 +14,22 @@ import { IsActive } from "../modules/user/user.interface";
     try {
       const accessToken = req.headers.authorization;
 
+
       if (!accessToken) {
         throw new AppError(403, "No Token Recieved");
       }
+          //  const authHeader = req.headers.authorization;
+
+          //  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+          //    throw new AppError(403, "No Token Received or Invalid Format");
+          //  }
+
+          //  const token = authHeader.split(" ")[1];
 
 
       const verifiedToken = verifyToken(
         accessToken,
+        // token,
         envVars.JWT_ACCESS_SECRET
       ) as JwtPayload;
 
